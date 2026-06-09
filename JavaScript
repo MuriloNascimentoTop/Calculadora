@@ -1,0 +1,100 @@
+const previousOperationText = document.getElementById('previous-operation');
+const currentOperationText = document.getElementById('current-operation');
+
+let currentOperand = '';
+let previousOperand = '';
+let operation = undefined;
+
+function appendNumber(number) {
+    // Evita múltiplos pontos decimais
+    if (number === '.' && currentOperand.includes('.')) return;
+    
+    // Evita múltiplos zeros no início
+    if (number === '0' && currentOperand === '0') return;
+    
+    // Substitui o zero inicial se outro número for digitado
+    if (currentOperand === '0' && number !== '.') {
+        currentOperand = number.toString();
+    } else {
+        currentOperand = currentOperand.toString() + number.toString();
+    }
+    
+    updateDisplay();
+}
+
+function chooseOperator(selectedOperation) {
+    if (currentOperand === '') return;
+    if (previousOperand !== '') {
+        calculate();
+    }
+    operation = selectedOperation;
+    previousOperand = currentOperand;
+    currentOperand = '';
+    updateDisplay();
+}
+
+function calculate() {
+    let computation;
+    const prev = parseFloat(previousOperand);
+    const current = parseFloat(currentOperand);
+    
+    if (isNaN(prev) || isNaN(current)) return;
+    
+    switch (operation) {
+        case '+':
+            computation = prev + current;
+            break;
+        case '-':
+            computation = prev - current;
+            break;
+        case '*':
+            computation = prev * current;
+            break;
+        case '/':
+            if (current === 0) {
+                alert("Erro: Divisão por zero não permitida!");
+                clearDisplay();
+                return;
+            }
+            computation = prev / current;
+            break;
+        default:
+            return;
+    }
+    
+    // Limita casas decimais longas para não quebrar o layout
+    currentOperand = Number(computation.toFixed(8)).toString();
+    operation = undefined;
+    previousOperand = '';
+    updateDisplay();
+}
+
+function clearDisplay() {
+    currentOperand = '0';
+    previousOperand = '';
+    operation = undefined;
+    updateDisplay();
+}
+
+function deleteDigit() {
+    if (currentOperand === '0' || currentOperand.length <= 1) {
+        currentOperand = '0';
+    } else {
+        currentOperand = currentOperand.toString().slice(0, -1);
+    }
+    updateDisplay();
+}
+
+function updateDisplay() {
+    currentOperationText.innerText = currentOperand;
+    if (operation != null) {
+        // Altera o sinal visual de multiplicação na tela de histórico
+        const displayOp = operation === '*' ? '×' : operation;
+        previousOperationText.innerText = `${previousOperand} ${displayOp}`;
+    } else {
+        previousOperationText.innerText = '';
+    }
+}
+
+// Inicializa a tela com o valor padrão
+clearDisplay();
